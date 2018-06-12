@@ -1,20 +1,37 @@
 
-#My task is to write a webpage scraper in python
+import praw
+import pandas as pd
 
-#I've chosen to create a scraper that will scrape r/combatfootage's posts for a day and pull any that mention 'ATGM'
+r = praw.Reddit(client_id='j2rOXc83Q1ojcQ',
+                client_secret='IDR1o4sqwgMxlsDpoVB6vx9WvCU',
+                password='thisismyPassword',
+                user_agent='script by /u/tav1991',
+                username='tav1991')
 
-#To do this, I'll scrape the username, source, and permalink for any permalink that contains 'ATGM'
+subreddit = r.subreddit('combatfootage')
 
-from bs4 import BeautifulSoup
-import requests
-import os, os.path, csv
+keyword = 'ATGM'
 
-listingurl = 'https://www.reddit.com/r/CombatFootage/'
+header_list = ['title', 'id', 'url']
 
-response = requests.get(listingurl)
-soup = BeautifulSoup(response.text, 'html.parser')
+titles = []
+ids = []
+urls = []
 
-post_list = soup.find(class_="title may-blank outbound")
+for submission in subreddit.hot(limit=1000):
+    if keyword in submission.title:
+        titles.append(submission.title)
 
-print(post_list)
+for submission in subreddit.hot(limit=1000):
+    if keyword in submission.title:
+        ids.append(submission.id)
 
+for submission in subreddit.hot(limit=1000):
+    if keyword in submission.title:
+        urls.append(submission.url)
+
+df = pd.DataFrame({'Titles': titles, 'Ids': ids, 'URLs': urls})
+
+del titles, ids, urls
+
+pd.to_csv('results.csv')
